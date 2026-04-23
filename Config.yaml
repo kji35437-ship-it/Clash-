@@ -1,0 +1,177 @@
+mixed-port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+
+external-controller: 127.0.0.1:9090
+
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+
+proxy-providers:
+
+  p1:
+    type: http
+    url: https://raw.githubusercontent.com/PuddinCat/BestClash/refs/heads/main/proxies.yaml
+    interval: 3600
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 300
+
+  p2:
+    type: http
+    url: https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
+    interval: 3600
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 300
+
+  p3:
+    type: http
+    url: https://shz.al/JXxQ
+    interval: 3600
+
+  p4:
+    type: http
+    url: https://tg.wxgqlfx.fun/wxzl
+    interval: 3600
+
+  p5:
+    type: http
+    url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
+    interval: 3600
+
+  p6:
+    type: http
+    url: https://proxy.v2gh.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    interval: 3600
+
+  p7:
+    type: http
+    url: https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml
+    interval: 3600
+
+proxy-groups:
+
+# 🚀 主入口
+- name: 🚀自动
+  type: select
+  proxies:
+    - 🧠智能核心
+    - DIRECT
+
+# 🧠 核心 fallback
+- name: 🧠智能核心
+  type: fallback
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+  url: http://cp.cloudflare.com/generate_204
+  interval: 300
+
+# 🌐 日常
+- name: 🌐日用
+  type: url-test
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+  url: http://cp.cloudflare.com/generate_204
+  interval: 180
+  tolerance: 80
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+
+# 🎬 视频
+- name: 🎬视频
+  type: url-test
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+  url: http://cp.cloudflare.com/generate_204
+  interval: 180
+  tolerance: 100
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
+
+# 📱 TikTok
+- name: 📱TikTok
+  type: url-test
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+  url: http://cp.cloudflare.com/generate_204
+  interval: 180
+  tolerance: 50
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
+
+# 🐦 X
+- name: 🐦X
+  type: url-test
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+  url: http://cp.cloudflare.com/generate_204
+  interval: 120
+  tolerance: 50
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
+
+rules:
+
+# TikTok
+- DOMAIN-SUFFIX,tiktok.com,📱TikTok
+- DOMAIN-SUFFIX,tiktokv.com,📱TikTok
+- DOMAIN-SUFFIX,byteoversea.com,📱TikTok
+
+# X
+- DOMAIN-SUFFIX,x.com,🐦X
+- DOMAIN-SUFFIX,twitter.com,🐦X
+- DOMAIN-SUFFIX,twimg.com,🐦X
+
+# YouTube
+- DOMAIN-SUFFIX,youtube.com,🎬视频
+- DOMAIN-SUFFIX,googlevideo.com,🎬视频
+- DOMAIN-SUFFIX,ytimg.com,🎬视频
+
+# 流媒体
+- DOMAIN-SUFFIX,netflix.com,🎬视频
+- DOMAIN-SUFFIX,nflxvideo.net,🎬视频
+- DOMAIN-SUFFIX,disneyplus.com,🎬视频
+
+# 国内
+- DOMAIN-SUFFIX,bilibili.com,DIRECT
+- DOMAIN-SUFFIX,qq.com,DIRECT
+- DOMAIN-SUFFIX,taobao.com,DIRECT
+- DOMAIN-SUFFIX,jd.com,DIRECT
+- GEOIP,CN,DIRECT
+
+# 兜底
+- MATCH,🚀自动
