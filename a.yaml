@@ -1,0 +1,164 @@
+# 转换自Loon稳定版 适配OpenClash Meta内核
+mixed-port: 7890
+allow-lan: true
+bind-address: "*"
+log-level: info
+external-controller: 127.0.0.1:9090
+tcp-concurrent: true
+sni: true
+
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  default-nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+  enhanced-mode: redir-host
+  fake-ip-range: 198.18.0.1/16
+  use-hosts: true
+
+proxies: []
+
+proxy-providers:
+  自动最快:
+    type: http
+    url: https://raw.githubusercontent.com/PuddinCat/BestClash/refs/heads/main/proxies.yaml
+    interval: 3600
+    path: ./providers/zdkz.yaml
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 600
+  自动抓取免费节点:
+    type: http
+    url: https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
+    interval: 3600
+    path: ./providers/mfjd.yaml
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 600
+  节点2:
+    type: http
+    url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
+    interval: 3600
+    path: ./providers/node2.yaml
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 600
+  自动2:
+    type: http
+    url: https://proxy.v2gh.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    interval: 3600
+    path: ./providers/auto2.yaml
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 600
+  自动1:
+    type: http
+    url: https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml
+    interval: 3600
+    path: ./providers/auto1.yaml
+    health-check:
+      enable: true
+      url: http://cp.cloudflare.com/generate_204
+      interval: 600
+
+proxy-groups:
+  - name: 🚀自动
+    type: select
+    proxies:
+      - 🧠智能核心
+      - DIRECT
+
+  - name: 🧠智能核心
+    type: fallback
+    proxies:
+      - 🌐日用
+      - 🎬视频
+    interval: 300
+    timeout: 3000
+
+  - name: 🌐日用
+    type: url-test
+    use:
+      - 自动最快
+      - 自动抓取免费节点
+      - 节点2
+      - 自动2
+      - 自动1
+    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+    exclude-filter: "流量|过期|到期|官网|客服|邀请|返利|重置"
+    url: http://cp.cloudflare.com/generate_204
+    interval: 180
+    tolerance: 80
+
+  - name: 🎬视频
+    type: url-test
+    use:
+      - 自动最快
+      - 自动抓取免费节点
+      - 节点2
+      - 自动2
+      - 自动1
+    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+    exclude-filter: "流量|过期|到期|官网|客服|邀请|返利|重置"
+    url: http://cp.cloudflare.com/generate_204
+    interval: 180
+    tolerance: 100
+
+  - name: 📱TikTok
+    type: url-test
+    use:
+      - 自动最快
+      - 自动抓取免费节点
+      - 节点2
+      - 自动2
+      - 自动1
+    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+    exclude-filter: "流量|过期|到期|官网|客服|邀请|返利|重置"
+    url: http://cp.cloudflare.com/generate_204
+    interval: 180
+    tolerance: 50
+
+  - name: 🐦X
+    type: url-test
+    use:
+      - 自动最快
+      - 自动抓取免费节点
+      - 节点2
+      - 自动2
+      - 自动1
+    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+    exclude-filter: "流量|过期|到期|官网|客服|邀请|返利|重置"
+    url: http://cp.cloudflare.com/generate_204
+    interval: 120
+    tolerance: 50
+
+rules:
+  # TikTok
+  - DOMAIN-SUFFIX,tiktok.com,📱TikTok
+  - DOMAIN-SUFFIX,tiktokv.com,📱TikTok
+  - DOMAIN-SUFFIX,byteoversea.com,📱TikTok
+  # X推特
+  - DOMAIN-SUFFIX,x.com,🐦X
+  - DOMAIN-SUFFIX,twitter.com,🐦X
+  - DOMAIN-SUFFIX,twimg.com,🐦X
+  # YouTube
+  - DOMAIN-SUFFIX,youtube.com,🎬视频
+  - DOMAIN-SUFFIX,googlevideo.com,🎬视频
+  - DOMAIN-SUFFIX,ytimg.com,🎬视频
+  # 流媒体
+  - DOMAIN-SUFFIX,netflix.com,🎬视频
+  - DOMAIN-SUFFIX,nflxvideo.net,🎬视频
+  - DOMAIN-SUFFIX,disneyplus.com,🎬视频
+  # 国内直连
+  - DOMAIN-SUFFIX,bilibili.com,DIRECT
+  - DOMAIN-SUFFIX,qq.com,DIRECT
+  - DOMAIN-SUFFIX,taobao.com,DIRECT
+  - DOMAIN-SUFFIX,jd.com,DIRECT
+  - GEOIP,CN,DIRECT
+  # 兜底
+  - MATCH,🚀自动
