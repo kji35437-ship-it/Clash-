@@ -20,26 +20,21 @@ profile:
   store-selected: true
   store-fake-ip: true
 
-# ========= DNS 关键修复：不抢 53、国内用国内DNS =========
 dns:
   enable: true
-  listen: 127.0.0.1:7875   # 改 7875，不和系统 53 冲突
-  default-nameserver:      # 新增：兜底用国内DNS
+
+  listen: 127.0.0.1:7875
+
+  ipv6: false
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+
+  use-hosts: true
+
+  default-nameserver:
     - 223.5.5.5
     - 114.114.114.114
-  ipv6: false
-  enhanced-mode: redir-host  # 先不用 fake-ip，最稳
-  # fake-ip-range: 198.18.0.1/16  # 暂时注释
-
-  fake-ip-filter:
-    - geosite:cn
-    - '+.github.com'
-    - '+.githubusercontent.com'
-    - '+.githubassets.com'
-    - '+.openai.com'
-    - '+.chatgpt.com'
-    - '+.youtube.com'
-    - '+.googlevideo.com'
 
   nameserver:
     - https://223.5.5.5/dns-query
@@ -48,23 +43,39 @@ dns:
   fallback:
     - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
+    - tls://1.0.0.1:853
 
   fallback-filter:
     geoip: true
     geoip-code: CN
 
-  use-hosts: true
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - time.windows.com
+    - time.apple.com
+    - stun.*
+    - stun.*.*
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - geosite:cn
 
 tun:
-  enable: false
+  enable: true
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+
+  dns-hijack:
+    - any:53
 
 proxy-providers:
+
   p1:
     type: http
     url: https://raw.githubusercontent.com/PuddinCat/BestClash/refs/heads/main/proxies.yaml
     path: ./proxy_provider/p1.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -76,7 +87,6 @@ proxy-providers:
     url: https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
     path: ./proxy_provider/p2.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -88,7 +98,6 @@ proxy-providers:
     url: https://shz.al/JXxQ
     path: ./proxy_provider/p3.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -100,7 +109,6 @@ proxy-providers:
     url: https://tg.wxgqlfx.fun/wxzl
     path: ./proxy_provider/p4.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -112,7 +120,6 @@ proxy-providers:
     url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
     path: ./proxy_provider/p5.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -124,7 +131,6 @@ proxy-providers:
     url: https://proxy.v2gh.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
     path: ./proxy_provider/p6.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -133,10 +139,9 @@ proxy-providers:
 
   p7:
     type: http
-    url: https://raw.githubusercontent.com/a2470985/getNode/main/clash.yaml
+    url: https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml
     path: ./proxy_provider/p7.yaml
     interval: 7200
-    max-size: 30
     health-check:
       enable: true
       lazy: true
@@ -144,20 +149,10 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
-  - name: 🚀手动选择
-    type: select
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
-    filter: "(?i)(SG|JP|US|HK|TW|KR)"
 
-  - name: 🚀自动选择
+  - name: 🚀国外自动
     type: url-test
+
     use:
       - p1
       - p2
@@ -166,45 +161,93 @@ proxy-groups:
       - p5
       - p6
       - p7
+
     url: https://www.gstatic.com/generate_204
+
     interval: 600
-    tolerance: 100
+    tolerance: 200
     lazy: true
-    filter: "(?i)(SG|JP|US|HK|TW|KR)"
 
-  - name: 🌍国外节点
-    type: select
-    proxies:
-      - 🚀自动选择
-      - 🚀手动选择
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国|HK|Hong Kong|香港|TW|Taiwan|台湾|KR|Korea|韩国)"
 
-  - name: 🎯Final
+  - name: 🚀手动
     type: select
+
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+
+  - name: 🌍国外服务
+    type: select
+
     proxies:
-      - 🌍国外节点
-      - DIRECT
+      - 🚀国外自动
+      - 🚀手动
 
 rules:
-# 局域网直连
-- IP-CIDR,192.168.0.0/16,DIRECT
+
+# 局域网
+- IP-CIDR,127.0.0.0/8,DIRECT
 - IP-CIDR,10.0.0.0/8,DIRECT
 - IP-CIDR,172.16.0.0/12,DIRECT
+- IP-CIDR,192.168.0.0/16,DIRECT
 
-# GitHub 走代理
-- DOMAIN-SUFFIX,github.com,🌍国外节点
-- DOMAIN-SUFFIX,githubusercontent.com,🌍国外节点
-
-# 国内直连（核心）
-- GEOIP,CN,DIRECT
-
-# Apple 直连
+# Apple
 - DOMAIN-SUFFIX,apple.com,DIRECT
 - DOMAIN-SUFFIX,icloud.com,DIRECT
 
-# 国外服务
-- DOMAIN-SUFFIX,google.com,🌍国外节点
-- DOMAIN-SUFFIX,youtube.com,🌍国外节点
-- DOMAIN-SUFFIX,openai.com,🌍国外节点
+# Microsoft
+- DOMAIN-SUFFIX,msftconnecttest.com,DIRECT
+- DOMAIN-SUFFIX,msftncsi.com,DIRECT
 
-# 兜底：所有没匹配到的→先国外，不行就直连（防断网）
-- MATCH,🎯Final
+# GitHub
+- DOMAIN-SUFFIX,github.com,🌍国外服务
+- DOMAIN-SUFFIX,githubusercontent.com,🌍国外服务
+- DOMAIN-SUFFIX,githubassets.com,🌍国外服务
+
+# OpenAI
+- DOMAIN-SUFFIX,openai.com,🌍国外服务
+- DOMAIN-SUFFIX,chatgpt.com,🌍国外服务
+- DOMAIN-SUFFIX,oaistatic.com,🌍国外服务
+
+# Google
+- DOMAIN-SUFFIX,google.com,🌍国外服务
+- DOMAIN-SUFFIX,gstatic.com,🌍国外服务
+- DOMAIN-SUFFIX,googleapis.com,🌍国外服务
+
+# YouTube
+- DOMAIN-SUFFIX,youtube.com,🌍国外服务
+- DOMAIN-SUFFIX,googlevideo.com,🌍国外服务
+- DOMAIN-SUFFIX,ytimg.com,🌍国外服务
+
+# TikTok
+- DOMAIN-SUFFIX,tiktok.com,🌍国外服务
+- DOMAIN-SUFFIX,tiktokv.com,🌍国外服务
+- DOMAIN-SUFFIX,byteoversea.com,🌍国外服务
+
+# X/Twitter
+- DOMAIN-SUFFIX,x.com,🌍国外服务
+- DOMAIN-SUFFIX,twitter.com,🌍国外服务
+- DOMAIN-SUFFIX,twimg.com,🌍国外服务
+
+# Netflix
+- DOMAIN-SUFFIX,netflix.com,🌍国外服务
+- DOMAIN-SUFFIX,nflxvideo.net,🌍国外服务
+
+# Disney+
+- DOMAIN-SUFFIX,disneyplus.com,🌍国外服务
+
+# Steam
+- DOMAIN-SUFFIX,steampowered.com,DIRECT
+- DOMAIN-SUFFIX,steamcontent.com,DIRECT
+
+# 国内直连
+- GEOIP,CN,DIRECT
+
+# 最终兜底
+- MATCH,🌍国外服务
