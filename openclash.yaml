@@ -6,6 +6,7 @@ mode: rule
 log-level: warning
 
 external-controller: 0.0.0.0:9090
+skip-certificate-verification: true
 
 tcp-concurrent: true
 unified-delay: true
@@ -19,38 +20,33 @@ profile:
   store-selected: true
   store-fake-ip: true
 
-# ======================
-# DNS（核心稳定模块）
-# ======================
+# ========= DNS 关键修复：不抢 53、国内用国内DNS =========
 dns:
   enable: true
-  listen: 127.0.0.1:7874
-
+  listen: 127.0.0.1:7875   # 改 7875，不和系统 53 冲突
+  default-nameserver:      # 新增：兜底用国内DNS
+    - 223.5.5.5
+    - 114.114.114.114
   ipv6: false
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
+  enhanced-mode: redir-host  # 先不用 fake-ip，最稳
+  # fake-ip-range: 198.18.0.1/16  # 暂时注释
 
-  # 重点：加入防卡顿 + 防Fastly报错过滤
   fake-ip-filter:
     - geosite:cn
     - '+.github.com'
     - '+.githubusercontent.com'
     - '+.githubassets.com'
-    - '+.github.io'
     - '+.openai.com'
     - '+.chatgpt.com'
-    - '+.oaistatic.com'
-    - '+.oaiusercontent.com'
     - '+.youtube.com'
     - '+.googlevideo.com'
-    - '+.tiktok.com'
 
   nameserver:
-    - https://1.1.1.1/dns-query
-    - https://dns.google/dns-query
+    - https://223.5.5.5/dns-query
+    - https://dns.alidns.com/dns-query
 
   fallback:
-    - https://1.0.0.1/dns-query
+    - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
 
   fallback-filter:
@@ -59,100 +55,95 @@ dns:
 
   use-hosts: true
 
-# ======================
-# TUN（保持关闭）
-# ======================
 tun:
   enable: false
 
-# ======================
-# Proxy Providers
-# ======================
 proxy-providers:
-
   p1:
     type: http
     url: https://raw.githubusercontent.com/PuddinCat/BestClash/refs/heads/main/proxies.yaml
     path: ./proxy_provider/p1.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p2:
     type: http
     url: https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
     path: ./proxy_provider/p2.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p3:
     type: http
     url: https://shz.al/JXxQ
     path: ./proxy_provider/p3.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p4:
     type: http
     url: https://tg.wxgqlfx.fun/wxzl
     path: ./proxy_provider/p4.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p5:
     type: http
     url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
     path: ./proxy_provider/p5.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p6:
     type: http
     url: https://proxy.v2gh.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
     path: ./proxy_provider/p6.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
   p7:
     type: http
     url: https://raw.githubusercontent.com/a2470985/getNode/main/clash.yaml
     path: ./proxy_provider/p7.yaml
     interval: 7200
+    max-size: 30
     health-check:
       enable: true
       lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 300
+      interval: 600
 
-# ======================
-# Proxy Groups（稳定版）
-# ======================
 proxy-groups:
-
-  # 手动选择（保底）
   - name: 🚀手动选择
     type: select
     use:
@@ -163,10 +154,8 @@ proxy-groups:
       - p5
       - p6
       - p7
-    # 关键：只留境外节点，彻底屏蔽国内节点
-    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|USA|America|美国|HK|HongKong|香港|TW|Taiwan|台湾|KR|Korea|韩国)"
+    filter: "(?i)(SG|JP|US|HK|TW|KR)"
 
-  # 自动测速（主力）
   - name: 🚀自动选择
     type: url-test
     use:
@@ -178,60 +167,44 @@ proxy-groups:
       - p6
       - p7
     url: https://www.gstatic.com/generate_204
-    interval: 300
+    interval: 600
     tolerance: 100
     lazy: true
-    # 关键：只留境外节点，彻底屏蔽国内节点
-    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|USA|America|美国|HK|HongKong|香港|TW|Taiwan|台湾|KR|Korea|韩国)"
+    filter: "(?i)(SG|JP|US|HK|TW|KR)"
 
-  # 国外出口
   - name: 🌍国外节点
     type: select
     proxies:
       - 🚀自动选择
       - 🚀手动选择
 
-  # 最终兜底
   - name: 🎯Final
     type: select
     proxies:
       - 🌍国外节点
       - DIRECT
 
-# ======================
-# Rules（稳定分流）
-# ======================
-
 rules:
-
 # 局域网直连
 - IP-CIDR,192.168.0.0/16,DIRECT
 - IP-CIDR,10.0.0.0/8,DIRECT
 - IP-CIDR,172.16.0.0/12,DIRECT
 
-# GitHub 强制走代理（解决Fastly报错）
+# GitHub 走代理
 - DOMAIN-SUFFIX,github.com,🌍国外节点
 - DOMAIN-SUFFIX,githubusercontent.com,🌍国外节点
-- DOMAIN-SUFFIX,githubassets.com,🌍国外节点
 
-# 国内直连
+# 国内直连（核心）
 - GEOIP,CN,DIRECT
 
-# Apple 服务直连
+# Apple 直连
 - DOMAIN-SUFFIX,apple.com,DIRECT
 - DOMAIN-SUFFIX,icloud.com,DIRECT
 
-# 常用国外服务
+# 国外服务
 - DOMAIN-SUFFIX,google.com,🌍国外节点
-- DOMAIN-SUFFIX,googlevideo.com,🌍国外节点
 - DOMAIN-SUFFIX,youtube.com,🌍国外节点
-- DOMAIN-SUFFIX,facebook.com,🌍国外节点
-- DOMAIN-SUFFIX,instagram.com,🌍国外节点
-- DOMAIN-SUFFIX,twitter.com,🌍国外节点
-
-# AI服务
 - DOMAIN-SUFFIX,openai.com,🌍国外节点
-- DOMAIN-SUFFIX,chatgpt.com,🌍国外节点
 
-# 兜底规则
+# 兜底：所有没匹配到的→先国外，不行就直连（防断网）
 - MATCH,🎯Final
