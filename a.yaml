@@ -1,15 +1,22 @@
 mixed-port: 7893
 allow-lan: true
 bind-address: "*"
+
 mode: rule
 log-level: warning
 
 external-controller: 0.0.0.0:9090
+
 tcp-concurrent: true
 unified-delay: true
 find-process-mode: strict
 global-client-fingerprint: chrome
+
+keep-alive-idle: 600
+keep-alive-interval: 30
+
 ipv6: false
+geodata-mode: true
 
 profile:
   store-selected: true
@@ -17,7 +24,9 @@ profile:
 
 dns:
   enable: true
+
   listen: 127.0.0.1:7874
+
   ipv6: false
 
   enhanced-mode: fake-ip
@@ -31,20 +40,16 @@ dns:
 
   fallback:
     - https://1.1.1.1/dns-query
-    - https://dns.google/dns-query
+    - https://8.8.8.8/dns-query
+    - https://dns.cloudflare.com/dns-query
+    - tls://1.0.0.1:853
 
   fallback-filter:
     geoip: true
     geoip-code: CN
 
 tun:
-  enable: true
-  stack: mixed
-  auto-route: true
-  auto-detect-interface: true
-
-  dns-hijack:
-    - any:53
+  enable: false
 
 proxy-providers:
 
@@ -55,6 +60,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -65,6 +71,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -75,6 +82,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -85,6 +93,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -95,6 +104,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -105,6 +115,7 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
@@ -115,22 +126,24 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
+      lazy: true
       url: http://www.gstatic.com/generate_204
       interval: 600
 
 proxy-groups:
 
-# 🚀 主入口
+# 主入口
 - name: 🚀自动
   type: select
   proxies:
-    - 🧠智能核心
     - 🌐日用
+    - 🧠智能核心
     - DIRECT
 
-# 🧠 核心容灾
+# 自动容灾
 - name: 🧠智能核心
   type: fallback
+
   use:
     - p1
     - p2
@@ -141,10 +154,11 @@ proxy-groups:
     - p7
 
   url: http://www.gstatic.com/generate_204
+
   interval: 600
   lazy: true
 
-# 🌐 日常
+# 日常自动测速
 - name: 🌐日用
   type: url-test
 
@@ -158,13 +172,14 @@ proxy-groups:
     - p7
 
   url: http://www.gstatic.com/generate_204
+
   interval: 600
   tolerance: 150
   lazy: true
 
-  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
 
-# 🎬 视频
+# 视频
 - name: 🎬视频
   type: select
 
@@ -179,7 +194,7 @@ proxy-groups:
 
   filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
 
-# 📱 TikTok
+# TikTok
 - name: 📱TikTok
   type: select
 
@@ -194,7 +209,7 @@ proxy-groups:
 
   filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
 
-# 🐦 X
+# X/Twitter
 - name: 🐦X
   type: fallback
 
@@ -208,14 +223,13 @@ proxy-groups:
     - p7
 
   url: http://www.gstatic.com/generate_204
+
   interval: 600
   lazy: true
 
-  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
-
-# 🤖 AI
+# AI/GitHub
 - name: 🤖AI
-  type: select
+  type: url-test
 
   use:
     - p1
@@ -226,9 +240,25 @@ proxy-groups:
     - p6
     - p7
 
-  filter: "(?i)(SG|Singapore|新加坡|US|United States|美国|JP|Japan|日本)"
+  url: http://www.gstatic.com/generate_204
+
+  interval: 900
+  tolerance: 100
+  lazy: true
+
+  filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国)"
 
 rules:
+
+# GitHub
+- DOMAIN-SUFFIX,github.com,🤖AI
+- DOMAIN-SUFFIX,githubusercontent.com,🤖AI
+- DOMAIN-SUFFIX,githubassets.com,🤖AI
+
+# OpenAI
+- DOMAIN-SUFFIX,openai.com,🤖AI
+- DOMAIN-SUFFIX,chatgpt.com,🤖AI
+- DOMAIN-SUFFIX,oaistatic.com,🤖AI
 
 # TikTok
 - DOMAIN-SUFFIX,tiktok.com,📱TikTok
@@ -244,6 +274,7 @@ rules:
 - DOMAIN-SUFFIX,youtube.com,🎬视频
 - DOMAIN-SUFFIX,googlevideo.com,🎬视频
 - DOMAIN-SUFFIX,ytimg.com,🎬视频
+- DOMAIN-SUFFIX,youtu.be,🎬视频
 
 # Netflix
 - DOMAIN-SUFFIX,netflix.com,🎬视频
@@ -252,25 +283,15 @@ rules:
 # Disney+
 - DOMAIN-SUFFIX,disneyplus.com,🎬视频
 
-# OpenAI
-- DOMAIN-SUFFIX,openai.com,🤖AI
-- DOMAIN-SUFFIX,chatgpt.com,🤖AI
-
 # Apple
 - DOMAIN-SUFFIX,apple.com,DIRECT
 - DOMAIN-SUFFIX,icloud.com,DIRECT
 
-# Steam
+# Steam CDN
 - DOMAIN-SUFFIX,steamcontent.com,DIRECT
 
 # 国内
-- DOMAIN-SUFFIX,bilibili.com,DIRECT
-- DOMAIN-SUFFIX,qq.com,DIRECT
-- DOMAIN-SUFFIX,taobao.com,DIRECT
-- DOMAIN-SUFFIX,jd.com,DIRECT
-- DOMAIN-SUFFIX,163.com,DIRECT
-
 - GEOIP,CN,DIRECT
 
-# 兜底
+# 默认
 - MATCH,🚀自动
