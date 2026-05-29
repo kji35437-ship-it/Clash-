@@ -1,0 +1,388 @@
+mixed-port: 7893
+allow-lan: true
+bind-address: "*"
+
+mode: rule
+log-level: warning
+
+external-controller: 0.0.0.0:9090
+skip-certificate-verification: true
+
+tcp-concurrent: true
+unified-delay: true
+find-process-mode: strict
+global-client-fingerprint: chrome
+
+ipv6: false
+geodata-mode: true
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+dns:
+  enable: true
+  listen: 127.0.0.1:7875
+  ipv6: false
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+
+  use-hosts: true
+
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+
+  nameserver:
+    - https://223.5.5.5/dns-query
+    - https://dns.alidns.com/dns-query
+
+  fallback:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+    - tls://1.0.0.1:853
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - time.windows.com
+    - time.apple.com
+    - stun.*
+    - stun.*.*
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "+.microsoft.com"
+    - "+.edge.microsoft.com"
+    - geosite:cn
+
+sniffer:
+  enable: true
+
+  sniff:
+    TLS:
+      ports:
+        - 443
+        - 8443
+
+    HTTP:
+      ports:
+        - 80
+        - 8080
+      override-destination: true
+
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
+
+tun:
+  enable: true
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+
+  dns-hijack:
+    - any:53
+
+proxy-providers:
+
+  p1:
+    type: http
+    url: https://raw.githubusercontent.com/PuddinCat/BestClash/refs/heads/main/proxies.yaml
+    path: ./proxy_provider/p1.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p2:
+    type: http
+    url: https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
+    path: ./proxy_provider/p2.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p3:
+    type: http
+    url: https://shz.al/JXxQ
+    path: ./proxy_provider/p3.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p4:
+    type: http
+    url: https://tg.wxgqlfx.fun/wxzl
+    path: ./proxy_provider/p4.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p5:
+    type: http
+    url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
+    path: ./proxy_provider/p5.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p6:
+    type: http
+    url: https://proxy.v2gh.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    path: ./proxy_provider/p6.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+  p7:
+    type: http
+    url: https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml
+    path: ./proxy_provider/p7.yaml
+    interval: 7200
+    health-check:
+      enable: true
+      lazy: true
+      url: https://www.gstatic.com/generate_204
+      interval: 600
+
+proxy-groups:
+  # 新增：保底节点（放在 手动 前面）
+  - name: 🆘保底节点
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    lazy: true
+
+  - name: 🚀国外自动
+    type: url-test
+
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+
+    url: https://www.gstatic.com/generate_204
+
+    interval: 1800
+    tolerance: 500
+    lazy: true
+
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国|HK|Hong Kong|香港|TW|Taiwan|台湾|KR|Korea|韩国)"
+
+  # 替换为 fallback + 对应测速地址、间隔、地域过滤
+  - name: 🎬TikTok
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://www.tiktok.com/generate_204
+    interval: 600
+    lazy: true
+    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国)"
+
+  # 替换为 fallback + 对应测速地址、间隔、地域过滤
+  - name: 📺YouTube
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://www.youtube.com/generate_204
+    interval: 600
+    lazy: true
+    filter: "(?i)(HK|Hong Kong|香港|JP|Japan|日本|SG|Singapore|新加坡)"
+
+  # 替换为 fallback + 对应测速地址、间隔、地域过滤
+  - name: 🤖AI
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://chat.openai.com/cdn-cgi/trace
+    interval: 600
+    lazy: true
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国)"
+
+  # 新增 GitHub 专用组
+  - name: 💻GitHub
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://github.com
+    interval: 600
+    lazy: true
+    filter: "(?i)(HK|Hong Kong|香港|JP|Japan|日本|SG|Singapore|新加坡)"
+
+  # 新增 Telegram 专用组
+  - name: 📨Telegram
+    type: fallback
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+    url: https://telegram.org
+    interval: 600
+    lazy: true
+    filter: "(?i)(SG|Singapore|新加坡|HK|Hong Kong|香港|JP|Japan|日本)"
+
+  - name: 🚀手动
+    type: select
+
+    use:
+      - p1
+      - p2
+      - p3
+      - p4
+      - p5
+      - p6
+      - p7
+
+  - name: 🌍国外服务
+    type: select
+
+    proxies:
+      - 🚀国外自动
+      - 🚀手动
+
+rules:
+
+# 局域网
+- IP-CIDR,127.0.0.0/8,DIRECT
+- IP-CIDR,10.0.0.0/8,DIRECT
+- IP-CIDR,172.16.0.0/12,DIRECT
+- IP-CIDR,192.168.0.0/16,DIRECT
+
+# 微软
+- DOMAIN-SUFFIX,edge.microsoft.com,DIRECT
+- DOMAIN-SUFFIX,microsoft.com,DIRECT
+- DOMAIN-SUFFIX,live.com,DIRECT
+- DOMAIN-SUFFIX,office.com,DIRECT
+- DOMAIN-SUFFIX,windowsupdate.com,DIRECT
+
+# 国内服务
+- DOMAIN-SUFFIX,douyin.com,DIRECT
+- DOMAIN-SUFFIX,amemv.com,DIRECT
+- DOMAIN-SUFFIX,snssdk.com,DIRECT
+- DOMAIN-SUFFIX,bilibili.com,DIRECT
+- DOMAIN-SUFFIX,hdslb.com,DIRECT
+- DOMAIN-SUFFIX,iqiyi.com,DIRECT
+- DOMAIN-SUFFIX,youku.com,DIRECT
+- DOMAIN-SUFFIX,qq.com,DIRECT
+- DOMAIN-SUFFIX,wechat.com,DIRECT
+- DOMAIN-SUFFIX,weixin.qq.com,DIRECT
+- DOMAIN-SUFFIX,xiaohongshu.com,DIRECT
+- DOMAIN-SUFFIX,xhscdn.com,DIRECT
+- DOMAIN-SUFFIX,netease.com,DIRECT
+- DOMAIN-SUFFIX,music.163.com,DIRECT
+- GEOIP,CN,DIRECT
+
+# GitHub 分流至专属组（已修改）
+- DOMAIN-SUFFIX,github.com,💻GitHub
+- DOMAIN-SUFFIX,githubusercontent.com,💻GitHub
+- DOMAIN-SUFFIX,githubassets.com,💻GitHub
+
+# OpenAI / Claude
+- DOMAIN-SUFFIX,openai.com,🤖AI
+- DOMAIN-SUFFIX,chatgpt.com,🤖AI
+- DOMAIN-SUFFIX,oaistatic.com,🤖AI
+- DOMAIN-SUFFIX,claude.ai,🤖AI
+- DOMAIN-SUFFIX,anthropic.com,🤖AI
+
+# Google
+- DOMAIN-SUFFIX,google.com,🌍国外服务
+- DOMAIN-SUFFIX,gstatic.com,🌍国外服务
+- DOMAIN-SUFFIX,googleapis.com,🌍国外服务
+
+# YouTube
+- DOMAIN-SUFFIX,youtube.com,📺YouTube
+- DOMAIN-SUFFIX,googlevideo.com,📺YouTube
+- DOMAIN-SUFFIX,ytimg.com,📺YouTube
+- DOMAIN-SUFFIX,youtu.be,📺YouTube
+
+# TikTok
+- DOMAIN-SUFFIX,tiktok.com,🎬TikTok
+- DOMAIN-SUFFIX,tiktokv.com,🎬TikTok
+- DOMAIN-SUFFIX,byteoversea.com,🎬TikTok
+- DOMAIN-SUFFIX,tiktokcdn.com,🎬TikTok
+
+# Telegram 分流至专属组（已修改）
+- DOMAIN-SUFFIX,telegram.org,📨Telegram
+- DOMAIN-SUFFIX,t.me,📨Telegram
+- DOMAIN-SUFFIX,telegra.ph,📨Telegram
+
+# X/Twitter
+- DOMAIN-SUFFIX,x.com,🌍国外服务
+- DOMAIN-SUFFIX,twitter.com,🌍国外服务
+- DOMAIN-SUFFIX,twimg.com,🌍国外服务
+
+# Netflix
+- DOMAIN-SUFFIX,netflix.com,🌍国外服务
+- DOMAIN-SUFFIX,nflxvideo.net,🌍国外服务
+
+# Disney+
+- DOMAIN-SUFFIX,disneyplus.com,🌍国外服务
+
+# Steam
+- DOMAIN-SUFFIX,steampowered.com,DIRECT
+- DOMAIN-SUFFIX,steamcontent.com,DIRECT
+
+# 最终规则
+- MATCH,🌍国外服务
