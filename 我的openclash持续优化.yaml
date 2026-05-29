@@ -56,7 +56,28 @@ dns:
     - stun.*.*
     - "+.msftconnecttest.com"
     - "+.msftncsi.com"
+    - "+.microsoft.com"
+    - "+.edge.microsoft.com"
     - geosite:cn
+
+sniffer:
+  enable: true
+
+  sniff:
+    TLS:
+      ports:
+        - 443
+        - 8443
+
+    HTTP:
+      ports:
+        - 80
+        - 8080
+      override-destination: true
+
+  skip-domain:
+    - "Mijia Cloud"
+    - "+.push.apple.com"
 
 tun:
   enable: true
@@ -76,9 +97,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p2:
     type: http
@@ -87,9 +108,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p3:
     type: http
@@ -98,9 +119,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p4:
     type: http
@@ -109,9 +130,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p5:
     type: http
@@ -120,9 +141,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p6:
     type: http
@@ -131,9 +152,9 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
   p7:
     type: http
@@ -142,14 +163,14 @@ proxy-providers:
     interval: 7200
     health-check:
       enable: true
-      lazy: false
+      lazy: true
       url: https://www.gstatic.com/generate_204
-      interval: 1800
+      interval: 600
 
 proxy-groups:
 
   - name: 🚀国外自动
-    type: fallback
+    type: url-test
 
     use:
       - p1
@@ -161,14 +182,15 @@ proxy-groups:
       - p7
 
     url: https://www.gstatic.com/generate_204
+
     interval: 1800
-    tolerance: 50
-    lazy: false
+    tolerance: 500
+    lazy: true
 
-    filter: "(?i)(HK|Hong Kong|香港|JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|TW|Taiwan|台湾|KR|Korea|韩国)"
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国|HK|Hong Kong|香港|TW|Taiwan|台湾|KR|Korea|韩国)"
 
-  - name: 📱TikTok
-    type: fallback
+  - name: 🎬TikTok
+    type: url-test
 
     use:
       - p1
@@ -179,15 +201,16 @@ proxy-groups:
       - p6
       - p7
 
-    url: https://www.tiktok.com
+    url: https://www.tiktok.com/generate_204
+
     interval: 1800
-    tolerance: 30
-    lazy: false
+    tolerance: 150
+    lazy: true
 
-    filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|KR|Korea|韩国)"
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国)"
 
-  - name: 🎥YouTube
-    type: fallback
+  - name: 📺YouTube
+    type: url-test
 
     use:
       - p1
@@ -199,14 +222,15 @@ proxy-groups:
       - p7
 
     url: https://www.youtube.com/generate_204
-    interval: 1800
-    tolerance: 50
-    lazy: false
 
-    filter: "(?i)(HK|JP|SG|US|TW)"
+    interval: 1800
+    tolerance: 200
+    lazy: true
+
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国|HK|Hong Kong|香港)"
 
   - name: 🤖AI
-    type: fallback
+    type: url-test
 
     use:
       - p1
@@ -218,68 +242,12 @@ proxy-groups:
       - p7
 
     url: https://chat.openai.com/cdn-cgi/trace
+
     interval: 1800
-    tolerance: 50
-    lazy: false
+    tolerance: 150
+    lazy: true
 
-    filter: "(?i)(US|United States|美国|SG|Singapore|新加坡|JP|Japan|日本)"
-
-  - name: 💻GitHub
-    type: fallback
-
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
-
-    url: https://github.com
-    interval: 1800
-    tolerance: 50
-    lazy: false
-
-    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国|HK|Hong Kong|香港)"
-
-  - name: ✈️Telegram
-    type: fallback
-
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
-
-    url: https://telegram.org
-    interval: 1800
-    tolerance: 30
-    lazy: false
-
-    filter: "(?i)(SG|Singapore|新加坡|HK|Hong Kong|香港|JP|Japan|日本)"
-
-  - name: 🎬流媒体
-    type: fallback
-
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
-
-    url: https://www.netflix.com/title/70143836
-    interval: 1800
-    tolerance: 50
-    lazy: false
-
-    filter: "(?i)(NF|Netflix|解锁|原生|US|JP|SG|HK)"
+    filter: "(?i)(SG|Singapore|新加坡|JP|Japan|日本|US|United States|美国)"
 
   - name: 🚀手动
     type: select
@@ -293,6 +261,13 @@ proxy-groups:
       - p6
       - p7
 
+  - name: 🌍国外服务
+    type: select
+
+    proxies:
+      - 🚀国外自动
+      - 🚀手动
+
 rules:
 
 # 局域网
@@ -301,20 +276,36 @@ rules:
 - IP-CIDR,172.16.0.0/12,DIRECT
 - IP-CIDR,192.168.0.0/16,DIRECT
 
-# Apple
-- DOMAIN-SUFFIX,apple.com,DIRECT
-- DOMAIN-SUFFIX,icloud.com,DIRECT
+# 微软
+- DOMAIN-SUFFIX,edge.microsoft.com,DIRECT
+- DOMAIN-SUFFIX,microsoft.com,DIRECT
+- DOMAIN-SUFFIX,live.com,DIRECT
+- DOMAIN-SUFFIX,office.com,DIRECT
+- DOMAIN-SUFFIX,windowsupdate.com,DIRECT
 
-# Microsoft
-- DOMAIN-SUFFIX,msftconnecttest.com,DIRECT
-- DOMAIN-SUFFIX,msftncsi.com,DIRECT
+# 国内服务
+- DOMAIN-SUFFIX,douyin.com,DIRECT
+- DOMAIN-SUFFIX,amemv.com,DIRECT
+- DOMAIN-SUFFIX,snssdk.com,DIRECT
+- DOMAIN-SUFFIX,bilibili.com,DIRECT
+- DOMAIN-SUFFIX,hdslb.com,DIRECT
+- DOMAIN-SUFFIX,iqiyi.com,DIRECT
+- DOMAIN-SUFFIX,youku.com,DIRECT
+- DOMAIN-SUFFIX,qq.com,DIRECT
+- DOMAIN-SUFFIX,wechat.com,DIRECT
+- DOMAIN-SUFFIX,weixin.qq.com,DIRECT
+- DOMAIN-SUFFIX,xiaohongshu.com,DIRECT
+- DOMAIN-SUFFIX,xhscdn.com,DIRECT
+- DOMAIN-SUFFIX,netease.com,DIRECT
+- DOMAIN-SUFFIX,music.163.com,DIRECT
+- GEOIP,CN,DIRECT
 
 # GitHub
-- DOMAIN-SUFFIX,github.com,💻GitHub
-- DOMAIN-SUFFIX,githubusercontent.com,💻GitHub
-- DOMAIN-SUFFIX,githubassets.com,💻GitHub
+- DOMAIN-SUFFIX,github.com,🌍国外服务
+- DOMAIN-SUFFIX,githubusercontent.com,🌍国外服务
+- DOMAIN-SUFFIX,githubassets.com,🌍国外服务
 
-# AI
+# OpenAI / Claude
 - DOMAIN-SUFFIX,openai.com,🤖AI
 - DOMAIN-SUFFIX,chatgpt.com,🤖AI
 - DOMAIN-SUFFIX,oaistatic.com,🤖AI
@@ -322,50 +313,42 @@ rules:
 - DOMAIN-SUFFIX,anthropic.com,🤖AI
 
 # Google
-- DOMAIN-SUFFIX,google.com,🚀国外自动
-- DOMAIN-SUFFIX,gstatic.com,🚀国外自动
-- DOMAIN-SUFFIX,googleapis.com,🚀国外自动
+- DOMAIN-SUFFIX,google.com,🌍国外服务
+- DOMAIN-SUFFIX,gstatic.com,🌍国外服务
+- DOMAIN-SUFFIX,googleapis.com,🌍国外服务
 
 # YouTube
-- DOMAIN-SUFFIX,youtube.com,🎥YouTube
-- DOMAIN-SUFFIX,googlevideo.com,🎥YouTube
-- DOMAIN-SUFFIX,ytimg.com,🎥YouTube
+- DOMAIN-SUFFIX,youtube.com,📺YouTube
+- DOMAIN-SUFFIX,googlevideo.com,📺YouTube
+- DOMAIN-SUFFIX,ytimg.com,📺YouTube
+- DOMAIN-SUFFIX,youtu.be,📺YouTube
 
 # TikTok
-- DOMAIN-SUFFIX,tiktok.com,📱TikTok
-- DOMAIN-SUFFIX,tiktokv.com,📱TikTok
-- DOMAIN-SUFFIX,byteoversea.com,📱TikTok
+- DOMAIN-SUFFIX,tiktok.com,🎬TikTok
+- DOMAIN-SUFFIX,tiktokv.com,🎬TikTok
+- DOMAIN-SUFFIX,byteoversea.com,🎬TikTok
+- DOMAIN-SUFFIX,tiktokcdn.com,🎬TikTok
 
 # Telegram
-- DOMAIN-SUFFIX,telegram.org,✈️Telegram
-- DOMAIN-SUFFIX,t.me,✈️Telegram
-- DOMAIN-SUFFIX,telegram-cdn.org,✈️Telegram
+- DOMAIN-SUFFIX,telegram.org,🌍国外服务
+- DOMAIN-SUFFIX,t.me,🌍国外服务
+- DOMAIN-SUFFIX,telegra.ph,🌍国外服务
 
 # X/Twitter
-- DOMAIN-SUFFIX,x.com,🚀国外自动
-- DOMAIN-SUFFIX,twitter.com,🚀国外自动
-- DOMAIN-SUFFIX,twimg.com,🚀国外自动
+- DOMAIN-SUFFIX,x.com,🌍国外服务
+- DOMAIN-SUFFIX,twitter.com,🌍国外服务
+- DOMAIN-SUFFIX,twimg.com,🌍国外服务
 
 # Netflix
-- DOMAIN-SUFFIX,netflix.com,🎬流媒体
-- DOMAIN-SUFFIX,nflxvideo.net,🎬流媒体
+- DOMAIN-SUFFIX,netflix.com,🌍国外服务
+- DOMAIN-SUFFIX,nflxvideo.net,🌍国外服务
 
 # Disney+
-- DOMAIN-SUFFIX,disneyplus.com,🎬流媒体
+- DOMAIN-SUFFIX,disneyplus.com,🌍国外服务
 
 # Steam
 - DOMAIN-SUFFIX,steampowered.com,DIRECT
 - DOMAIN-SUFFIX,steamcontent.com,DIRECT
 
-# 国内视频
-- DOMAIN-SUFFIX,douyin.com,DIRECT
-- DOMAIN-SUFFIX,amemv.com,DIRECT
-- DOMAIN-SUFFIX,snssdk.com,DIRECT
-- DOMAIN-SUFFIX,bilibili.com,DIRECT
-- DOMAIN-SUFFIX,hdslb.com,DIRECT
-
-# 国内直连
-- GEOIP,CN,DIRECT
-
-# 最终兜底
-- MATCH,🚀国外自动
+# 最终规则
+- MATCH,🌍国外服务
