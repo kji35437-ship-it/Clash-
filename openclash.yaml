@@ -9,15 +9,21 @@ ipv6: false
 
 external-controller: 127.0.0.1:9090
 
+unified-delay: true
+tcp-concurrent: true
 
-# =====================
-# DNS（按照INI优化）
-# =====================
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+
+# ======================
+# DNS（按照你之前ini风格）
+# ======================
 
 dns:
   enable: true
-  ipv6: false
-
+  listen: 127.0.0.1:7874
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
 
@@ -26,21 +32,21 @@ dns:
     - 114.114.114.114
 
   nameserver:
-    - 223.5.5.5
-    - 114.114.114.114
+    - https://223.5.5.5/dns-query
+    - https://1.1.1.1/dns-query
 
   fallback:
-    - 1.1.1.1
-    - 8.8.8.8
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
 
   fallback-filter:
     geoip: true
     geoip-code: CN
 
 
-# =====================
-# 七个订阅源
-# =====================
+# ======================
+# 订阅源
+# ======================
 
 proxy-providers:
 
@@ -51,7 +57,7 @@ proxy-providers:
     path: ./providers/p1.yaml
     health-check:
       enable: true
-      url: https://www.gstatic.com/generate_204
+      url: http://www.gstatic.com/generate_204
       interval: 300
 
 
@@ -62,7 +68,7 @@ proxy-providers:
     path: ./providers/p2.yaml
     health-check:
       enable: true
-      url: https://www.gstatic.com/generate_204
+      url: http://www.gstatic.com/generate_204
       interval: 300
 
 
@@ -85,10 +91,6 @@ proxy-providers:
     url: https://raw.githubusercontent.com/go4sharing/sub/main/sub.yaml
     interval: 3600
     path: ./providers/p5.yaml
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
 
 
   p6:
@@ -103,194 +105,152 @@ proxy-providers:
     url: https://raw.githubusercontent.com/a2470982985/getNode/main/clash.yaml
     interval: 3600
     path: ./providers/p7.yaml
-# =====================
-# 极简策略组
-# =====================
-
 proxy-groups:
 
-
+# ======================
 # 主入口
-  - name: 🚀默认代理
-    type: select
-    proxies:
-      - 🧠自动优选
-      - 🖱手动选择
-      - DIRECT
+# ======================
+
+- name: 🚀默认代理
+  type: select
+  proxies:
+    - ⚡智能自动
+    - 🖐手动选择
+    - DIRECT
 
 
+# ======================
 # 自动测速核心
-  - name: 🧠自动优选
-    type: url-test
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
+# ======================
 
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 80
+- name: ⚡智能自动
+  type: url-test
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
+
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 80
+
+  filter: "(?i)(JP|Japan|日本|SG|Singapore|新加坡|US|United States|美国|DE|Germany|德国|UK|英国)"
 
 
+# ======================
 # 手动选择
-  - name: 🖱手动选择
-    type: select
-    use:
-      - p1
-      - p2
-      - p3
-      - p4
-      - p5
-      - p6
-      - p7
+# ======================
+
+- name: 🖐手动选择
+  type: select
+
+  use:
+    - p1
+    - p2
+    - p3
+    - p4
+    - p5
+    - p6
+    - p7
 
 
+# ======================
+# 视频专用
+# ======================
 
-# AI服务
-  - name: ✨AI
-    type: select
-    proxies:
-      - 🧠自动优选
-      - 🖱手动选择
-      - DIRECT
+- name: 🎬视频
+  type: fallback
 
+  proxies:
+    - ⚡智能自动
+    - 🖐手动选择
 
-
-# 视频流媒体
-  - name: 🎬流媒体
-    type: select
-    proxies:
-      - 🧠自动优选
-      - 🖱手动选择
-      - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: 300
 
 
+# ======================
+# AI专用
+# ======================
 
-# 社交服务
-  - name: 🌐社交
-    type: select
-    proxies:
-      - 🧠自动优选
-      - 🖱手动选择
-      - DIRECT
+- name: 🤖AI
+  type: fallback
 
+  proxies:
+    - ⚡智能自动
+    - 🖐手动选择
 
-
-# 游戏
-  - name: 🎮游戏
-    type: select
-    proxies:
-      - 🧠自动优选
-      - 🖱手动选择
-      - DIRECT
-# =====================
-# 分流规则
-# =====================
-
+  url: http://www.gstatic.com/generate_204
+  interval: 300
 rules:
 
-
-# =====================
+# ======================
 # AI
-# =====================
+# ======================
 
-  - DOMAIN-SUFFIX,openai.com,✨AI
-  - DOMAIN-SUFFIX,chatgpt.com,✨AI
-  - DOMAIN-SUFFIX,ai.com,✨AI
-  - DOMAIN-SUFFIX,anthropic.com,✨AI
-  - DOMAIN-SUFFIX,claude.ai,✨AI
-  - DOMAIN-SUFFIX,gemini.google.com,✨AI
-  - DOMAIN-SUFFIX,perplexity.ai,✨AI
-  - DOMAIN-SUFFIX,copilot.microsoft.com,✨AI
-
+- DOMAIN-SUFFIX,openai.com,🤖AI
+- DOMAIN-SUFFIX,chatgpt.com,🤖AI
+- DOMAIN-SUFFIX,anthropic.com,🤖AI
+- DOMAIN-SUFFIX,claude.ai,🤖AI
+- DOMAIN-SUFFIX,gemini.google.com,🤖AI
+- DOMAIN-SUFFIX,ai.google,🤖AI
+- DOMAIN-SUFFIX,perplexity.ai,🤖AI
 
 
-# =====================
-# GitHub
-# =====================
-
-  - DOMAIN-SUFFIX,github.com,🚀默认代理
-  - DOMAIN-SUFFIX,githubusercontent.com,🚀默认代理
-
-
-
-# =====================
-# 社交
-# =====================
-
-  - DOMAIN-SUFFIX,tiktok.com,🌐社交
-  - DOMAIN-SUFFIX,tiktokv.com,🌐社交
-  - DOMAIN-SUFFIX,byteoversea.com,🌐社交
-
-  - DOMAIN-SUFFIX,x.com,🌐社交
-  - DOMAIN-SUFFIX,twitter.com,🌐社交
-  - DOMAIN-SUFFIX,twimg.com,🌐社交
-
-  - DOMAIN-SUFFIX,telegram.org,🌐社交
-  - DOMAIN-SUFFIX,t.me,🌐社交
-
-  - DOMAIN-SUFFIX,facebook.com,🌐社交
-  - DOMAIN-SUFFIX,fbcdn.net,🌐社交
-
-  - DOMAIN-SUFFIX,whatsapp.com,🌐社交
-
-
-
-# =====================
+# ======================
 # 视频流媒体
-# =====================
+# ======================
 
-  - DOMAIN-SUFFIX,youtube.com,🎬流媒体
-  - DOMAIN-SUFFIX,youtu.be,🎬流媒体
-  - DOMAIN-SUFFIX,googlevideo.com,🎬流媒体
-  - DOMAIN-SUFFIX,ytimg.com,🎬流媒体
+- DOMAIN-SUFFIX,youtube.com,🎬媒体
+- DOMAIN-SUFFIX,youtu.be,🎬媒体
+- DOMAIN-SUFFIX,googlevideo.com,🎬媒体
+- DOMAIN-SUFFIX,ytimg.com,🎬媒体
 
-  - DOMAIN-SUFFIX,netflix.com,🎬流媒体
-  - DOMAIN-SUFFIX,nflxvideo.net,🎬流媒体
-
-  - DOMAIN-SUFFIX,disneyplus.com,🎬流媒体
-  - DOMAIN-SUFFIX,hbo.com,🎬流媒体
-
-  - DOMAIN-SUFFIX,spotify.com,🎬流媒体
+- DOMAIN-SUFFIX,netflix.com,🎬媒体
+- DOMAIN-SUFFIX,nflxvideo.net,🎬媒体
+- DOMAIN-SUFFIX,disneyplus.com,🎬媒体
+- DOMAIN-SUFFIX,hbomax.com,🎬媒体
 
 
+# ======================
+# 社交
+# ======================
 
-# =====================
-# 游戏
-# =====================
+- DOMAIN-SUFFIX,tiktok.com,🚀默认代理
+- DOMAIN-SUFFIX,tiktokv.com,🚀默认代理
+- DOMAIN-SUFFIX,byteoversea.com,🚀默认代理
 
-  - DOMAIN-SUFFIX,steampowered.com,🎮游戏
-  - DOMAIN-SUFFIX,steamcommunity.com,🎮游戏
+- DOMAIN-SUFFIX,x.com,🚀默认代理
+- DOMAIN-SUFFIX,twitter.com,🚀默认代理
+- DOMAIN-SUFFIX,twimg.com,🚀默认代理
 
-  - DOMAIN-SUFFIX,epicgames.com,🎮游戏
-  - DOMAIN-SUFFIX,ea.com,🎮游戏
-  - DOMAIN-SUFFIX,blizzard.com,🎮游戏
+- DOMAIN-SUFFIX,telegram.org,🚀默认代理
+- DOMAIN-SUFFIX,t.me,🚀默认代理
 
 
+# ======================
+# 游戏 / 商店
+# ======================
 
-# =====================
+- DOMAIN-SUFFIX,steampowered.com,🚀默认代理
+- DOMAIN-SUFFIX,steamcommunity.com,🚀默认代理
+- DOMAIN-SUFFIX,epicgames.com,🚀默认代理
+
+
+# ======================
 # 国内直连
-# =====================
+# ======================
 
-  - GEOIP,CN,DIRECT
-
-  - DOMAIN-SUFFIX,cn,DIRECT
-
-  - DOMAIN-SUFFIX,bilibili.com,DIRECT
-  - DOMAIN-SUFFIX,qq.com,DIRECT
-  - DOMAIN-SUFFIX,wechat.com,DIRECT
-  - DOMAIN-SUFFIX,taobao.com,DIRECT
-  - DOMAIN-SUFFIX,jd.com,DIRECT
-  - DOMAIN-SUFFIX,baidu.com,DIRECT
+- DOMAIN-SUFFIX,cn,DIRECT
+- GEOIP,CN,DIRECT
 
 
+# ======================
+# 其他全部国外
+# ======================
 
-# =====================
-# 其它国外
-# =====================
-
-  - MATCH,🚀默认代理
+- MATCH,🚀默认代理
